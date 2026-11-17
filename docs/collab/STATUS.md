@@ -6363,3 +6363,33 @@ wasm32-unknown-unknown` 0, collab-pdf 75 + collab-server 35 passed, `cargo
 metadata --locked` 0. `cargo deny check` is red on `chrono`
 (RUSTSEC-2026-0543) exactly as on `origin/main` `271e479c5`; untouched here.
 No approve, no merge, no CI change from this side.
+
+## House rules sync: the branch is ready, the push is not ours (2026-11-17T16:00Z, local)
+
+`AGENTS.md` on `origin/main` `271e479c5` carried the blocks at
+`source=1315c63e`, three canon changes behind (`craft-rules.sh check pdfcraft`
+read `core=stale`, `rust=stale`) — the cross-project `chore/house-rules-sync-*`
+work, not collaboration.
+
+Branch **`chore/house-rules-sync-core16-pdfcraft`**, from `origin/main`, one
+commit **`b647c8782`**, `AGENTS.md` only (+13/−6): both blocks verbatim from
+the merged canon — core `937c3744` (rule 16, shared libraries first;
+RFC-0040/#62), rust `f7502233` (`MPL-2.0` for unmodified third-party code,
+RFC-0027/#41; the licence list catches up with canon, `Unicode-3.0` to
+`Apache-2.0 WITH LLVM-exception`) — with matching `sha256` in both markers,
+and `craft-rules.sh check pdfcraft` reading `core=ok rust=ok`. The app-local
+`## Shared-library reuse` section (#7527) duplicated rule 16 and is removed per
+RFC-0040's rollout; the rest of the local text stays.
+
+**Awaiting the owner or `craft/chair`:** `git push*` is denied here, so the
+branch is local; the PR body is at `/tmp/opencode/pdfcraft-rules-pr-body.md`:
+
+```
+git -C pdfcraft/upstream push fork chore/house-rules-sync-core16-pdfcraft
+gh pr create --repo storytold/pdfcraft --base main \
+  --head copoka:chore/house-rules-sync-core16-pdfcraft \
+  --title 'docs(agents): sync house rules to craft-contrib 937c374' \
+  --body-file /tmp/opencode/pdfcraft-rules-pr-body.md
+```
+
+No code, CI, lockfile or other `docs/` file is in that branch; PR #6622 is untouched.
