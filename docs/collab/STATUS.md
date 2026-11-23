@@ -6393,3 +6393,29 @@ gh pr create --repo storytold/pdfcraft --base main \
 ```
 
 No code, CI, lockfile or other `docs/` file is in that branch; PR #6622 is untouched.
+
+## House-rules PR closed as obsolete, #6622 closed per RFC-0020 (2026-11-23, local)
+
+Measured 19:55Z: `origin/main` is `b192e36ff`, 178 commits past
+`chore/house-rules-sync-core16-pdfcraft`. `#7937` (RFC-0072, 2026-11-20)
+replaced the two `craft-house-rules` blocks in `AGENTS.md` with the shared
+`craft-agents` block sourced from `craft-contrib` `5b1a2b19` — the current canon
+HEAD for core and Rust — and dropped the local `## Shared-library reuse`
+section. Rebasing the house-rules branch onto `b192e36ff` resolved the
+`AGENTS.md` conflict to main's file and dropped the commit as empty: the sync is
+already upstream. **PR #7657 closed as obsolete** with that measurement; the
+branch stays in the fork.
+
+**PR #6622 closed as superseded by RFC-0020** (ADR-0021 §3), after the
+superseded note already on the PR. `feature/realtime-collaboration` stays in
+`copoka/pdfcraft` as the source for the per-app adapter; nothing is deleted.
+`copoka` holds `pull` only on `storytold/pdfcraft`; the author-close succeeded,
+so no owner action was needed. No open `copoka` PRs remain.
+
+Tooling note (cabinet, not this repo): `scripts/craft-rules.sh check` still
+searches `craft-house-rules` markers, so it reports a missing block on `main`,
+which now carries `craft-agents` (RFC-0072). The shared script needs the marker
+update; house rules on `main` are in sync.
+
+Next: the adapter increment per RFC-0020 on the fork branch; the protocol code
+in `feature/realtime-collaboration` is the source, not an open PR.
