@@ -5509,6 +5509,9 @@ Ordered by the risk they pose to production.
 
 ## 6. Next session: plan
 
+> **Superseded 2026-11-23.** `#6622` is closed per RFC-0020 and the branch is the adapter
+> source, not a PR. The plan is `docs/collab/adapters.md`; everything below is history.
+
 Work in this order unless the owner says otherwise.
 
 **First, the owner's review and merge.** Measured 2026-11-16T09:52Z: the
@@ -6419,3 +6422,32 @@ update; house rules on `main` are in sync.
 
 Next: the adapter increment per RFC-0020 on the fork branch; the protocol code
 in `feature/realtime-collaboration` is the source, not an open PR.
+
+## The adapter plan and the contract state (2026-11-23T20:40Z, local)
+
+Measured at `d375f0595`: 174 above the merge base `271e479c5`, 823 behind `origin/main`
+`b192e36ff`; `git merge-tree origin/main HEAD` exits 1 with 17 conflicted files (`Cargo.toml`,
+`Cargo.lock`, `apps/pdfcraft-web/*`, `crates/engine/src/commands.rs`, ten `ui-egui` files).
+`#6622` and `#7657` are closed; the fork has no open `copoka` PR.
+
+Added **`docs/collab/adapters.md`**: 13 modules by contract role (≈36 600 collab-attributable
+lines), the six surfaces, the contract state and one increment of ≤1 500 lines. It decides:
+
+- **Increment 1 is the PDF projection, not the trait**: from `origin/main` `b192e36ff`, with
+  `PdfSchema`, `PdfView`, the merge-class `PdfChange` mapping and `apply` glue, plus five cases
+  ported from `e2e.rs`. No wire, no ids, no ordering, no unmerged pin; the `DocSchema`/
+  `HubAdapter` impl is increment 2.
+- **The session contracts PR does not exist.** `#128` is the CraftHub-lineage core (open since
+  2026-10-14, `DocSchema`/`HubAdapter`, a pure server) but has no invites, no TTL scope locks
+  and no `crdt.*` passthrough; it is not the RFC-0020 contracts PR and is not pinned.
+- **`Texts` is two properties here**: a comment body and a form-field value, both whole-string
+  merges. Page text is not in a session, so there is no `stale` path to delete.
+- **Two gaps go to the contracts PR, not local code**: geometric selection in presence, and
+  "lease + head on the page tree" as the structural scope lock (its cases already exist).
+- **The source branch is not merged this pass**: it is a closed PR and a source, and the port
+  starts from `main`; the conflict list is in `adapters.md` if it reopens.
+- The web crate pins `#716`'s head `7666e2b1`; no new unmerged pin is added, and that one
+  moves to the merge commit when `#716` lands.
+
+Gates: docs only, `git diff --check` clean; no code changed since `1cb097407`, whose gate run
+is above. Next: `feat/collab-adapter-projection` from `origin/main`, `PdfSchema` + `PdfView`.
