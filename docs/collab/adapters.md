@@ -30,6 +30,10 @@ half moves, the PDF mapping and the cabinet backend stay.
 
 ## The six surfaces it must meet
 
+RFC-0020's invite and chat surfaces are not in this plan: the cabinet mints invites and owns
+chat, and the editor stays a bare client (RFC-0020 surfaces 2–3). The six below are the ones
+the PDF adapter itself must meet.
+
 **1. Session.** The contract owes ordered submission, one relay per document, join reconciled
 with the persistent counter, relay-issued replica identities and opaque frames (RFC-0020
 constraints 1–5, landing order 2). The branch has the one-relay rule (`DocKey` is the cabinet
@@ -56,7 +60,7 @@ has no page-text path in a session on purpose: page content edits are not in the
 `session.apply` callers bypass collaboration (STATUS §7). What *is* text and does merge today
 is the comment body (`annotation.set_contents`) and a form-field value (`field.set_value`) —
 both whole strings, with the server's order deciding a concurrent write. Those two properties
-are the whole `Texts` surface here; there is no `stale` text path to delete, unlike wordcraft.
+are the whole `Texts` surface here; so there is no `stale` text path to delete here.
 
 **4. The PDF model.** The adapter maps the app's document into the contract's object model and
 back. The branch already has this mapping in both directions (`collab-pdf`,
@@ -71,8 +75,8 @@ projection cannot represent has to be refused at command entry, not diffed away.
 `committed {version, etag}`, a stale etag is `409`, the callback carries
 `{fileId, bytes, sha256, version, expectedVersion}`, the idempotency key is
 `fileId:version:sha256`, and the queue is rebuilt from `CURRENT` vs `CABINET` after a restart
-(`apps/pdfcraft-collab-server/src/rooms.rs:590-618`). It is implemented and tested (five
-integration files, 1 975 lines). Nothing in RFC-0020 changes it. The only shared piece is the
+(`apps/pdfcraft-collab-server/src/rooms.rs:590-618`). It is implemented and tested (four
+integration files, 1 917 lines). Nothing in RFC-0020 changes it. The only shared piece is the
 save answer — `craft_ui::cloud::Event::Saved` and `Fault::Conflict` at `#160` — which matters
 only if the cabinet is later reached through `craft-cloud`; today the daemon's client is plain
 `http://` with no redirects, chunking or TLS.
@@ -104,8 +108,8 @@ it in the schema (annotation-specific kinds only), not ask for a wire change.
   workspace pins `e2dc681a3`; that is an unmerged upstream revision already in the tree. Do
   not add another, and move it to the merge commit when `#716` lands.
 - `craft-libs#2108` (host statuses for the title bar) open, head `2882d72`.
-- Workspace pin `e2dc681a3` is on `main`, 2 285 commits behind `main`. `fd7232d7` is merged,
-  so the adapter can pin it without the ADR-0016 fork exception.
+- The workspace pin `e2dc681a3` is an ancestor of `main` and 2 285 commits behind it.
+  `fd7232d7` is merged, so the adapter can pin it without the ADR-0016 fork exception.
 
 ## First increment: the PDF projection (≤1 500 lines)
 
@@ -118,10 +122,10 @@ lands the half of the adapter the contract will call, and which the branch alrea
 | `PdfView`: projection of a session's document into the merge-class view (page and annotation nodes, field nodes, outline nodes, doc entries) | 450 |
 | `PdfChange`: the merge-class mapping both ways (`annotation.*`, `field.set_value`), wire names asserted stable | 450 |
 | `apply` glue through `Session::apply`; no envelope, no ids, no ordering | 100 |
-| tests: two replicas converge, structural-versus-merge conflict, viewer refusal, unsupported edit refused before the document changes, unknown objects survive | 200 |
+| tests: the five ported convergence, presence, undo, page and commit cases, plus a viewer refusal and an unsupported edit refused before the document changes | 200 |
 
 It deliberately names no trait: with the contracts PR unpublished, a local `DocSchema`-shaped
-trait would be the fifth protocol copy rule 16 forbids. A view/change model with no envelope,
+trait would be another protocol copy — what rule 16 forbids. A view/change model with no envelope,
 no ids and no ordering is the app's document mapping, which RFC-0020 keeps local. When the
 contract lands, increment 2 is `impl DocSchema`/`impl HubAdapter` over this module plus a pin
 bump (≤300 lines, no behaviour change).
@@ -130,9 +134,10 @@ The tests are ported from the branch's cases rather than invented:
 `three_clients_converge_and_a_late_joiner_catches_up`, `two_clients_share_a_typed_highlight`,
 `two_clients_undo_a_deleted_comment_and_a_deleted_page`,
 `two_clients_insert_and_duplicate_a_page_and_converge`,
-`a_commit_over_the_wire_produces_a_readable_pdf`,
-`a_commit_does_not_block_presence_in_another_room`, and the viewer and oversize cases
-(`crates/collab-ws/tests/e2e.rs`).
+`a_commit_over_the_wire_produces_a_readable_pdf` (`crates/collab-ws/tests/e2e.rs`). The
+structural-versus-merge case is the branch's own refused reply to a deleted parent
+(`two_clients_reply_with_a_status_and_a_deleted_parent_refuses_a_reply`): a merge-class change
+addressed to a scope a structural change removed is refused, never resurrected.
 
 ## Deferred, each with the condition to start
 
