@@ -6450,5 +6450,5 @@ lines), the six surfaces, the contract state and one increment of ≤1 500 lines
   moves to the merge commit when `#716` lands.
 
 Gates: docs only, `git diff --check` clean; no code changed since `1cb097407`, whose gate run
-is above. Pushed `ff7ee63e7` to `copoka/feature/realtime-collaboration`; `#6622` stays closed.
+is above. Pushed to `copoka/feature/realtime-collaboration`; `#6622` stays closed.
 Next: `feat/collab-adapter-projection` from `origin/main`, `PdfSchema` + `PdfView`.
